@@ -1,5 +1,5 @@
-﻿> ### 英语文档请见 [README.en.md](https://gitee.com/TDoraX/CMS/blob/master/README.en.md)
-> ### For English: Please refer to [README.en.md](https://gitee.com/TDoraX/CMS/blob/master/README.en.md)
+﻿> ### 英语文档请见 [README.en.md](https://github.com/TDoraX/CMS_Coop_Project/blob/master/README.md)
+> ### For English: Please refer to [README.en.md](https://github.com/TDoraX/CMS_Coop_Project/blob/master/README.md)
 
 # CMS后台管理系统 - 项目开发规范
 
