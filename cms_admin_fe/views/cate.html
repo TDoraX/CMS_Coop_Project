@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/icon.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/demo.css">
+    <script type="text/javascript" src="../public/javascripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../public/javascripts/jquery.easyui.min.js"></script>
+    <title>Users</title>
+</head>
+
+<body>
+    <!-- <div id="cc" class="easyui-layout" style="width:600px;height:400px;">
+        <div data-options="region:'west',title:'West',split:true" style="width:100px;">
+
+        </div>
+        <div data-options="region:'center',title:'center title'" style="padding:5px;background:#eee;">
+
+        </div>
+    </div> -->
+    <ul id="tt1"></ul>
+    <ul id="tt2"></ul>
+    <div id="mm" class="easyui-menu" style="width:120px;">
+        <div onclick="append()" data-options="iconCls:'icon-add'">Append</div>
+        <div onclick="removeit()" data-options="iconCls:'icon-remove'">Remove</div>
+        <div class="menu-sep"></div>
+        <div onclick="expand()">Expand</div>
+        <div onclick="collapse()">Collapse</div>
+    </div>
+    <div id="dd" style="padding-left:20px" data-options="">
+        <div style="margin:20px 0;"></div>
+        <form id="ff" method="post">
+            <input id="_id" name="_id" style="width:100%" type="hidden">
+            <input id="parentid" name="parentid" style="width:100%" type="hidden">
+            <input id="type" name="type" style="width:100%" type="hidden">
+            <div style="margin-bottom:20px">
+                <input class="easyui-textbox" name="text" style="width:90%" data-options="label:'Text:',required:true">
+            </div>
+        </form>
+        <div id="tijiao" style="text-align:center;padding:5px 0">
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width:80px">Submit</a>
+            <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width:80px">Clear</a>
+        </div>
+    </div>
+    <div id="ddremoves" style="padding-left:20px" data-options="">
+        <p>您将删除的是该分类及以下的所有内容,包括与之关联的用户数据</p>
+    </div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function() {
+
+        $('#dd').css('display', 'none')
+        $('#ddremoves').css('display', 'none')
+        $('#tt1').tree({
+            url: 'http://localhost:9000/cate/1',
+            method: 'get',
+            onContextMenu: function(e, node) {
+                e.preventDefault();
+                $(this).tree('select', node.target);
+                // console.log(node.target)
+                $('#mm').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+
+            onSelect: function(node) {
+                var root = $('#tt1').tree('getRoot')
+
+                $(root.target).parents('ul').siblings('ul').find('div.tree-node-selected').attr('class', 'tree-node')
+
+
+            }
+        });
+        $('#tt2').tree({
+            url: 'http://localhost:9000/cate/2',
+            method: 'get',
+            onContextMenu: function(e, node) {
+                e.preventDefault();
+                $(this).tree('select', node.target);
+                // console.log(node.target)
+                $('#mm').menu('show', {
+                    left: e.pageX,
+                    top: e.pageY
+                });
+            },
+
+            onSelect: function(node) {
+                var root = $('#tt2').tree('getRoot')
+
+                $(root.target).parents('ul').siblings('ul').find('div.tree-node-selected').attr('class', 'tree-node')
+
+
+            }
+        });
+    });
+
+    function append() {
+        var t = $('#tt1');
+        var t2 = $('#tt2');
+        var node = t.tree('getSelected') ? t.tree('getSelected') : t2.tree('getSelected');
+        window.thisT = node.type == 1 ? t : t2;
+
+        thisT.tree('append', {
+            parent: (node ? node.target : null),
+            data: [{
+                text: '...'
+            }]
+        });
+
+        $('#ff').find('#parentid').val(node._id)
+        $('#ff').find('#type').val(node.type)
+        $('#dd').dialog({
+            title: 'add',
+            width: 450,
+            height: 250,
+            closed: false,
+            cache: false,
+            modal: true,
+            onClose: function() {
+                $('#ff').form('clear')
+                thisT.tree('remove', node.target);
+                window.thisT.tree('reload')
+            }
+        });
+
+    }
+
+    function removeit() {
+        var t = $('#tt1');
+        var t2 = $('#tt2');
+        var node = t.tree('getSelected') ? t.tree('getSelected') : t2.tree('getSelected');
+        window.thisT = node.type == 1 ? t : t2;
+
+        $('#ddremoves').dialog({
+            title: 'removes?',
+            width: 450,
+            height: 250,
+            closed: false,
+            cache: false,
+            modal: true,
+            buttons: [{
+                text: 'ok',
+                handler: function() {
+
+                    // console.log(node.target)
+                    // console.log(thisT)
+                    var allNode = thisT.tree('getData', node.target)
+                        // console.log(thisT.tree('getData', node.target))
+                    var data = [];
+
+                    function res(allNode) {
+                        try {
+                            data.push(allNode._id)
+                            if (allNode.children[0]) {
+
+                                res(allNode.children[0])
+                            }
+                        } catch (e) {
+
+                        }
+
+                    }
+                    res(allNode)
+                    console.log(data.toString())
+                    $.ajax({
+                        url: 'http://localhost:9000/cate/' + data,
+                        method: 'delete',
+                        success: function(res) {
+                            // console.log(res)
+                            window.thisT.tree('remove', node.target);
+                            var whats = node.type == 1 ? 'news' : 'product'
+
+                            $.ajax({
+                                url: `http://localhost:9000/${whats}/${data.toString()}`,
+                                method: "delete"
+                            })
+                            window.thisT.tree('reload')
+                        }
+
+                    })
+                    $('#ddremoves').dialog({
+                        closed: true
+                    })
+                }
+            }, {
+                text: 'no',
+                handler: function() {
+                    $('#ddremoves').dialog({
+                        closed: true
+                    })
+                }
+            }]
+        });
+
+    }
+
+    function collapse() {
+        var t = $('#tt1');
+        var t2 = $('#tt2');
+        var node = t.tree('getSelected') ? t.tree('getSelected') : t2.tree('getSelected');
+        window.thisT = node.type == 1 ? t : t2;
+        window.thisT.tree('collapse', node.target);
+    }
+
+    function expand() {
+        var t = $('#tt1');
+        var t2 = $('#tt2');
+        var node = t.tree('getSelected') ? t.tree('getSelected') : t2.tree('getSelected');
+        window.thisT = node.type == 1 ? t : t2;
+        window.thisT.tree('expand', node.target);
+    }
+
+    function submitForm() {
+        if ($('#ff').find('input#_id').val().length > 0) {
+            $('#ff').form('submit', {
+                url: 'http://localhost:9000/cate/add',
+                success: function(res) {
+                    $('#dd').dialog('close')
+                    $("#dg").datagrid('reload')
+                    $('#ff').form('clear')
+                }
+            });
+            return
+        }
+
+        $('#ff').form('submit', {
+            url: 'http://localhost:9000/cate/add',
+            success: function(res) {
+                $('#dd').dialog('close')
+                window.thisT.tree('reload')
+            }
+        });
+    }
+
+    function clearForm() {
+        $('#ff').form('clear');
+    }
+</script>
+
+</html>

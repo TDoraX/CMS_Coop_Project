@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/icon.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/demo.css">
+    <script type="text/javascript" src="../public/javascripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../public/javascripts/jquery.easyui.min.js"></script>
+    <title>Users</title>
+</head>
+
+<body style="padding:0">
+<div data-options="fit:true" id="cc" class="easyui-layout" style="width:600px;height:400px;">
+    <div data-options="region:'west'" style="width:200px;">
+        <ul id="tt"></ul>
+    </div>
+    <div data-options="region:'center'" style="padding:5px;background:#eee;">
+        <table id="dg"></table>
+        <div id="dd" style="padding-left:20px" data-options="">
+            <div style="margin:20px 0;"></div>
+            <form id="ff" method="post">
+                <input id="_id" name="_id" style="width:100%" type="hidden">
+                <input id="productid" name="productid" style="width: 100%;" type="hidden">
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="name" style="width:90%"
+                           data-options="label:'Name:',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-numberbox" name="price" style="width:90%"
+                           data-options="label:'Price:',min:0,precision:2,required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox easyui-validatebox" name="place" style="width:90%"
+                           data-options="label:'Place:',required:true">
+                </div>
+
+
+                <!--<div style="margin-bottom:20px">-->
+                <!--<input class="easyui-radiobutton" name="productid" value="5c88ad3d3012c7176cea2c78" data-options="label:'本地产品:',checked:true">-->
+                <!--</div>-->
+                <!--<div style="margin-bottom:20px">-->
+                <!--<input class="easyui-radiobutton" name="productid" value="5c88adb13012c7176cea2c79" data-options="label:'外省产品:'">-->
+                <!--</div>-->
+                <!--<div style="margin-bottom:20px">-->
+                <!--<input class="easyui-radiobutton" name="productid" value="5c88adc33012c7176cea2c7a" data-options="label:'海外产品:'">-->
+                <!--</div>-->
+
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="producer" style="width:90%"
+                           data-options="label:'Producer:',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="image" style="width:90%"
+                           data-options="label:'Image:',required:true">
+                </div>
+            </form>
+            <div id="tijiao" style="text-align:center;padding:5px 0">
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()"
+                   style="width:80px">Submit</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()"
+                   style="width:80px">Clear</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        $('#dd').css('display', 'none')
+        $('#tt').tree({
+            url: 'http://localhost:9000/cate/2',
+            method: 'get',
+            onClick: function (node) {
+
+                if (node.domId == "tt_easyui_tree_1") {
+                    return
+                }
+                var _id = '';
+                var allNode = null;
+
+                if ($('#tt').tree('getChildren', node.target).length > 0) {
+                    allNode = $('#tt').tree('getChildren', node.target)
+                    for (i in allNode) {
+                        _id += allNode[i]._id + '_'
+                    }
+                    //原生逻辑
+                    // .slice(0, _id.lastIndexOf('_'))
+                    _id = _id + node._id
+                } else {
+                    _id = node._id
+                }
+
+                $('#dg').datagrid({
+                    queryParams: {
+                        productid: node._id
+                    }
+                })
+            }
+        });
+        $('#dg').datagrid({
+            // fit: true,
+            url: 'http://localhost:9000/product/',
+            method: 'get',
+            border: 0,
+            pagination: true,
+            columns: [
+                [{
+                    field: 'null',
+                    title: 'null',
+                    width: 250,
+                    checkbox: true
+                }, {
+                    field: 'name',
+                    title: 'name',
+                    width: 100
+                }, {
+                    field: 'price',
+                    title: 'price',
+                    width: 200
+                }, {
+                    field: 'place',
+                    title: 'place',
+                    width: 100
+                }, {
+                    field: 'producer',
+                    title: 'producer',
+                    width: 100
+                }, {
+                    field: 'image',
+                    title: 'image',
+                    width: 100
+                }, {
+                    field: '_id',
+                    title: '操作',
+                    width: 80,
+                    formatter: function (value, row, index) {
+                        return `<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove'"onclick="updateData('${row._id}')">修改</a> <a href="javascript:void(0)" onclick="deleteData('${row._id}')">删除</a>`
+                    }
+                }]
+            ]
+        });
+        parent.$('#add').on('click', function (e) {
+            if ($('#tt').tree('getSelected') == null) {
+                alert('请选择需要添加到哪个类别')
+                return
+            }
+            window.selectT = $('#tt').tree('getSelected')
+            $('#dd').dialog({
+                title: 'add user',
+                width: 450,
+                height: 600,
+                closed: false,
+                cache: false,
+                modal: true,
+                onClose: function () {
+                    $('#ff').form('clear')
+                }
+            });
+
+
+        })
+        parent.$('#ff').on('submit',)
+    });
+
+    function updateData(id) {
+
+        $.ajax({
+            url: 'http://localhost:9000/product/list/' + id,
+            method: 'get',
+            success: function (res) {
+                delete res[0].__v
+                $("#ff").form('load', res[0])
+                $('#dd').dialog({
+                    title: 'add user',
+                    width: 450,
+                    height: 600,
+                    closed: false,
+                    cache: false,
+                    modal: true
+                });
+            }
+        })
+    }
+
+    function deleteData(id) {
+
+        $.ajax({
+            url: 'http://localhost:9000/product/' + id,
+            method: 'delete',
+            data: "product=true",
+            success: function (res) {
+
+                $("#dg").datagrid('reload')
+            }
+        })
+    }
+
+    function submitForm() {
+        if ($('#ff').find('input#_id').val().length > 0) {
+            $('#ff').form('submit', {
+                url: 'http://localhost:9000/product/add',
+                success: function (res) {
+                    $('#dd').dialog('close')
+                    $("#dg").datagrid('reload')
+                    $('#ff').form('clear')
+                }
+            });
+            return
+        }
+        $('#ff').find('#productid').val(window.selectT._id);
+        $('#ff').form('submit', {
+            url: 'http://localhost:9000/product/add',
+            method: 'POST',
+            success: function (res) {
+                $('#dd').dialog('close')
+                $("#dg").datagrid('reload')
+            }
+        });
+    }
+
+    function clearForm() {
+        $('#ff').form('clear');
+    }
+</script>
+
+</html>/

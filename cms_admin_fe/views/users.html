@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/icon.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/demo.css">
+    <script type="text/javascript" src="../public/javascripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../public/javascripts/jquery.easyui.min.js"></script>
+    <title>Users</title>
+</head>
+
+<body>
+    <div data-options="fit:true" id="cc" class="easyui-layout" style="width:600px;height:400px;">
+
+        <div data-options="region:'center'" style="padding:5px;background:#eee;">
+            <table id="dg" style="width:100%;height:600px;">
+
+            </table>
+            <div id="tb" style="padding:2px 5px;">
+                <input class="easyui-textbox searchName" id="name" label="用户名称:" style="width:25%">
+
+                <a href="#" id="searchData" class="easyui-linkbutton" iconCls="icon-search" onclick="searchName()">Search</a>
+            </div>
+            <div id="dd" style="padding-left:20px" data-options="">
+                <div style="margin:20px 0;"></div>
+                <form id="ff" method="post">
+                    <input id="_id" name="_id" style="width:100%" type="hidden">
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-textbox" name="username" style="width:90%" data-options="label:'UserName:',required:true">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-textbox" name="name" style="width:90%" data-options="label:'Name:',required:true">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-textbox" name="email" style="width:90%" data-options="label:'Email:',required:true,validType:'email'">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-textbox" name="password" style="width:90%" data-options="label:'Password:',required:true">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-numberbox" name="age" style="width:90%" data-options="label:'Age:',min:1,required:true">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <select class="easyui-combobox" name="access" style="width:90%" data-options="label:'Access:',required:true">
+                            <option value="v1">v1</option>
+                            <option value="v2">v2</option>
+                            <option value="v3">v3</option>
+                            <option value="v4">v4</option>
+                            <option value="v5">boss</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-textbox" name="job" style="width:90%" data-options="label:'Job:',required:true">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-numberbox" name="phone" style="width:90%" data-options="label:'Phone:',min:0,required:true">
+                    </div>
+
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-radiobutton" name="gender" value='男' data-options="label:'男:',checked:true">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-radiobutton" name="gender" value='女' data-options="label:'女:',checked:true">
+                    </div>
+                    <div style="margin-bottom:20px">
+                        <input class="easyui-textbox" name="avatar" style="width:90%" data-options="label:'Avatar:',required:true">
+                    </div>
+                </form>
+                <div id="tijiao" style="text-align:center;padding:5px 0">
+                    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()" style="width:80px">Submit</a>
+                    <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()" style="width:80px">Clear</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#dd').css('display', 'none')
+        $('#dg').datagrid({
+            // fit: true,
+            url: 'http://localhost:9000/users/',
+            method: 'get',
+            border: 0,
+            pagination: true,
+            columns: [
+                [{
+                    field: 'null',
+                    title: 'null',
+                    width: 250,
+                    checkbox: true
+                }, {
+                    field: 'username',
+                    title: 'username',
+                    width: 100
+                }, {
+                    field: 'password',
+                    title: 'password',
+                    width: 100
+                }, {
+                    field: 'age',
+                    title: 'age',
+                    width: 100
+                }, {
+                    field: 'email',
+                    title: 'email',
+                    width: 200
+                }, {
+                    field: 'avatar',
+                    title: 'avatar',
+                    width: 100
+                }, {
+                    field: 'phone',
+                    title: 'phone',
+                    width: 100
+                }, {
+                    field: 'level',
+                    title: 'level',
+                    width: 100
+                }, {
+                    field: 'name',
+                    title: 'name',
+                    width: 100
+                }, {
+                    field: 'job',
+                    title: 'job',
+                    width: 100
+                }, {
+                    field: 'gender',
+                    title: 'gender',
+                    width: 100
+                }, {
+                    field: '_id',
+                    title: '操作',
+                    width: 80,
+                    formatter: function(value, row, index) {
+                        return `<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove'"onclick="updateData('${row._id}')">修改</a> <a href="javascript:void(0)" onclick="deleteData('${row._id}')">删除</a>`
+                    }
+                }]
+            ]
+        });
+
+        parent.$('#add').on('click', function(e) {
+
+            $('#dd').dialog({
+                title: 'add user',
+                width: 450,
+                height: 650,
+                closed: false,
+                cache: false,
+                modal: true,
+                onClose: function() {
+                    $('#ff').form('clear')
+                }
+            });
+
+
+        })
+
+    });
+
+    function updateData(id) {
+
+        $.ajax({
+            url: 'http://localhost:9000/users/' + id,
+            method: 'get',
+            success: function(res) {
+                delete res.__v
+                $("#ff").form('load', res)
+                $('#dd').dialog({
+                    title: 'add user',
+                    width: 450,
+                    height: 600,
+                    closed: false,
+                    cache: false,
+                    modal: true
+                });
+            }
+        })
+    }
+
+    function deleteData(id) {
+
+        $.ajax({
+            url: 'http://localhost:9000/users/' + id,
+            method: 'delete',
+            success: function(res) {
+                res.ok ? $("#dg").datagrid('reload') : ''
+            }
+        })
+    }
+
+    function submitForm() {
+        if ($('#ff').find('input#_id').val().length > 0) {
+            $('#ff').form('submit', {
+                url: 'http://localhost:9000/users/updata',
+                success: function(res) {
+                    $('#dd').dialog('close')
+                    $("#dg").datagrid('reload')
+                    $('#ff').form('clear')
+                }
+            });
+            return
+        }
+        $('#ff').form('submit', {
+            url: 'http://localhost:9000/users/register',
+            success: function(res) {
+                $('#dd').dialog('close')
+                $("#dg").datagrid('reload')
+            }
+        });
+    }
+
+    function clearForm() {
+        $('#ff').form('clear');
+    }
+
+    function searchName() {
+
+        var name = $('.searchName').val().trim()
+        $('#dg').css('margin-top', '20px')
+        $('#dg').datagrid({
+            url: 'http://localhost:9000/users/',
+            method: 'get',
+            queryParams: {
+                name: name
+            }
+        })
+    }
+</script>
+
+</html>

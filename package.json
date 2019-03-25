@@ -1,0 +1,14 @@
+{
+    "devDependencies": {
+        "gulp": "^4.0.0"
+    },
+    "scripts": {
+        "start": "gulp server"
+    },
+    "dependencies": {
+        "gulp-webserver": "^0.9.1",
+        "http-proxy-middleware": "^0.19.1",
+        "moment": "^2.24.0",
+        "webpack-stream": "^5.2.1"
+    }
+}

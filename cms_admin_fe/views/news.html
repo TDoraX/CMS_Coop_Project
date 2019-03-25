@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/easyui.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/icon.css">
+    <link rel="stylesheet" type="text/css" href="../public/stylesheets/demo.css">
+    <script type="text/javascript" src="../public/javascripts/jquery.min.js"></script>
+    <script type="text/javascript" src="../public/javascripts/jquery.easyui.min.js"></script>
+    <title>Users</title>
+</head>
+
+<body style="padding:0">
+<div data-options="fit:true" id="cc" class="easyui-layout" style="width:600px;height:400px;">
+    <div data-options="region:'west'" style="width:200px;">
+        <ul id="tt"></ul>
+    </div>
+    <div data-options="region:'center'" style="padding:5px;background:#eee;">
+        <table id="dg"></table>
+        <div id="dd" style="padding-left:20px" data-options="">
+            <div style="margin:20px 0;"></div>
+            <form id="ff" method="post">
+                <input id="_id" name="_id" style="width:100%" type="hidden">
+                <input id="newsid" name="newsid" style="width:100%" type="hidden">
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="title" style="width:90%"
+                           data-options="label:'Titel:',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="content" style="width:90%"
+                           data-options="label:'Content:',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="time" style="width:90%"
+                           data-options="label:'Time:',required:true">
+                </div>
+
+                <!-- <div style="margin-bottom:20px">
+                    <input class="easyui-radiobutton" name="newsid" value="5c876550b742961cbc4ba521" data-options="label:'财经新闻:',checked:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-radiobutton" name="newsid" value="5c876559b742961cbc4ba522" data-options="label:'中央新闻:'">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-radiobutton" name="newsid" value="5c87655fb742961cbc4ba523" data-options="label:'八卦新闻:'">
+                </div> -->
+                <!-- <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="category" style="width:90%" data-options="label:'Category:',required:true">
+                </div> -->
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="source" style="width:90%"
+                           data-options="label:'Source:',required:true">
+                </div>
+                <div style="margin-bottom:20px">
+                    <input class="easyui-textbox" name="place" style="width:90%"
+                           data-options="label:'Place:',required:true">
+                </div>
+            </form>
+            <div id="tijiao" style="text-align:center;padding:5px 0">
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="submitForm()"
+                   style="width:80px">Submit</a>
+                <a href="javascript:void(0)" class="easyui-linkbutton" onclick="clearForm()"
+                   style="width:80px">Clear</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        $('#dd').css('display', 'none')
+        $('#tt').tree({
+            url: 'http://localhost:9000/cate/1',
+            method: 'get',
+            onClick: function (node) {
+
+                if (node.domId == "tt_easyui_tree_1") {
+                    return
+                }
+                var _id = '';
+                var allNode = null;
+
+                if ($('#tt').tree('getChildren', node.target).length > 0) {
+                    allNode = $('#tt').tree('getChildren', node.target)
+                    for (i in allNode) {
+                        _id += allNode[i]._id + '_'
+                    }
+                    //原生逻辑
+                    // .slice(0, _id.lastIndexOf('_'))
+                    _id = _id + node._id
+                } else {
+                    _id = node._id
+                }
+
+                $('#dg').datagrid({
+                    queryParams: {
+                        newsid: _id
+                    }
+                })
+            }
+        });
+        $('#dg').datagrid({
+            // fit: true,
+            url: 'http://localhost:9000/news/',
+            method: 'get',
+            border: 0,
+            pagination: true,
+            columns: [
+                [{
+                    field: 'null',
+                    title: 'null',
+                    width: 250,
+                    checkbox: true
+                }, {
+                    field: 'title',
+                    title: 'title',
+                    width: 100
+                }, {
+                    field: 'content',
+                    title: 'content',
+                    width: 200
+                }, {
+                    field: 'time',
+                    title: 'time',
+                    width: 100
+                }, {
+                    field: 'source',
+                    title: 'source',
+                    width: 100
+                }, {
+                    field: 'place',
+                    title: 'place',
+                    width: 100
+                }, {
+                    field: '_id',
+                    title: '操作',
+                    width: 80,
+                    formatter: function (value, row, index) {
+                        return `<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-remove'"onclick="updateData('${row._id}')">修改</a> <a href="javascript:void(0)" onclick="deleteData('${row._id}')">删除</a>`
+                    }
+                }]
+            ]
+        });
+        parent.$('#add').on('click', function (e) {
+            if ($('#tt').tree('getSelected') == null) {
+                alert('请选择需要添加到哪个类别')
+                return
+            }
+            window.selectT = $('#tt').tree('getSelected')
+            $('#dd').dialog({
+                title: 'add user',
+                width: 450,
+                height: 400,
+                closed: false,
+                cache: false,
+                modal: true,
+                onClose: function () {
+                    $('#ff').form('clear')
+                }
+            });
+
+
+        })
+        parent.$('#ff').on('submit',)
+    });
+
+    function updateData(id) {
+
+        $.ajax({
+            url: 'http://localhost:9000/news/list/' + id,
+            method: 'get',
+            success: function (res) {
+                delete res[0].__v
+                $("#ff").form('load', res[0])
+                $('#dd').dialog({
+                    title: 'add user',
+                    width: 450,
+                    height: 400,
+                    closed: false,
+                    cache: false,
+                    modal: true
+                });
+            }
+        })
+    }
+
+    function deleteData(id) {
+
+        $.ajax({
+            url: 'http://localhost:9000/news/' + id,
+            method: 'delete',
+            data: "news=true",
+            success: function (res) {
+
+                $("#dg").datagrid('reload')
+            }
+        })
+    }
+
+    function submitForm() {
+        if ($('#ff').find('input#_id').val().length > 0) {
+            $('#ff').form('submit', {
+                url: 'http://localhost:9000/news/add',
+                success: function (res) {
+                    $('#dd').dialog('close')
+                    $("#dg").datagrid('reload')
+                    $('#ff').form('clear')
+                }
+            });
+            return
+        }
+        $('#ff').find('#newsid').val(window.selectT._id)
+        $('#ff').form('submit', {
+            url: 'http://localhost:9000/news/add',
+            method: 'POST',
+            success: function (res) {
+                $('#dd').dialog('close')
+                $("#dg").datagrid('reload')
+            }
+        });
+    }
+
+    function clearForm() {
+        $('#ff').form('clear');
+    }
+</script>
+
+</html>/
