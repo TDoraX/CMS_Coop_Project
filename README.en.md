@@ -1,5 +1,5 @@
 ﻿> ### 中文文档请见 [README.md](https://github.com/TDoraX/CMS_Coop_Project/blob/master/README.md)
-> ### For Chinese: Please refer to [README.md](https://github.com/TDoraX/CMS_Coop_Project/blob/master/README.md)
+> ### For Chinese: Please refer to [README.en.md](https://github.com/TDoraX/CMS_Coop_Project/blob/master/README.en.md)
 
 # Content Management System - Development Norms
 
